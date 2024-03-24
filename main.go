@@ -43,7 +43,7 @@ func main() {
 	})
 
 	router.POST("/upload", func(c *gin.Context) {
-		log.Println("Processing request.")
+		log.Println("Processing request")
 		name := c.PostForm("name")
 		name = path.Clean(name)
 
@@ -74,7 +74,7 @@ func main() {
 
 	err := router.Run(":" + port)
 	if err != nil {
-		log.Println("Error starting server: ", err.Error())
+		log.Println("Error starting server:", err.Error())
 		return
 	}
 }
