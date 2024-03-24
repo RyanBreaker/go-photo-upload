@@ -1,6 +1,6 @@
 module photo-upload
 
-go 1.22
+go 1.21
 
 require (
 	github.com/dropbox/dropbox-sdk-go-unofficial/v6 v6.0.5
