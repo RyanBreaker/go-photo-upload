@@ -13,21 +13,22 @@ import (
 var ClientId = os.Getenv("DBX_CLIENT_ID")
 var clientSecret = os.Getenv("DBX_CLIENT_SECRET")
 
-var RedirectUri string
-var AuthorizeUrl = fmt.Sprintf(
-	"https://www.dropbox.com/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&token_access_type=offline",
-	ClientId,
-	RedirectUri,
-)
+var redirectUri string
+var AuthorizeUri string
 
 const tokenUrl = "https://api.dropboxapi.com/oauth2/token"
 
 func init() {
 	if os.Getenv("ENV") == "production" {
-		RedirectUri = "https://wedding-photos.breaker.rocks/oauth2/redirect" // TODO: confirm correct?
+		redirectUri = "https://wedding-photos.breaker.rocks/oauth2/redirect"
 	} else {
-		RedirectUri = "http://localhost:8080/oauth2/redirect"
+		redirectUri = "http://localhost:8080/oauth2/redirect"
 	}
+	AuthorizeUri = fmt.Sprintf(
+		"https://www.dropbox.com/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&token_access_type=offline",
+		ClientId,
+		redirectUri,
+	)
 }
 
 type oauthTokens struct {
@@ -50,7 +51,7 @@ func SetTokens(code string) {
 	data.Add("grant_type", "authorization_code")
 	data.Add("client_id", ClientId)
 	data.Add("client_secret", clientSecret)
-	data.Add("redirect_uri", RedirectUri)
+	data.Add("redirect_uri", redirectUri)
 
 	res, err := http.PostForm(tokenUrl, data)
 	if err != nil {

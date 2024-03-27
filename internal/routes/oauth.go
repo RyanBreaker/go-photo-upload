@@ -11,7 +11,7 @@ func OauthRoutes(router *gin.Engine) {
 	oauthGroup := router.Group("/oauth2")
 	{
 		oauthGroup.GET("/authorize", func(c *gin.Context) {
-			c.Redirect(http.StatusFound, oauth.AuthorizeUrl)
+			c.Redirect(http.StatusFound, oauth.AuthorizeUri)
 		})
 
 		oauthGroup.GET("/redirect", func(c *gin.Context) {
