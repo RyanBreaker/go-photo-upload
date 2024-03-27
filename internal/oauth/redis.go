@@ -58,8 +58,7 @@ func setToken(tokenType string, token *oauthTokens) {
 	ctx := context.Background()
 	var err error
 	if tokenType == accessToken {
-		//expiration := time.Duration(token.ExpiresIn) * time.Second
-		expiration := time.Duration(15) * time.Second
+		expiration := time.Duration(token.ExpiresIn) * time.Second
 		err = client.Set(ctx, tokenType, token.AccessToken, expiration).Err()
 	} else {
 		err = client.Set(ctx, tokenType, token.RefreshToken, 0).Err()
