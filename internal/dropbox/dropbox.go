@@ -21,6 +21,7 @@ type Photo struct {
 func QueuePhotos(photos []Photo) {
 	log.Println("Queueing", len(photos), "photos")
 
+	// TODO: Counter for when files for given batch are done?
 	uploadWG.Wait()
 	for _, photo := range photos {
 		uploadWG.Add(1)

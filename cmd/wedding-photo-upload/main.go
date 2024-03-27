@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	log.SetOutput(os.Stdout)
+
 	router := gin.Default()
 
 	router.StaticFile("/", "./static/index.html")
