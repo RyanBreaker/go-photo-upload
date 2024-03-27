@@ -69,6 +69,7 @@ func SetTokens(code string) {
 func RefreshAccessToken() {
 	log.Println("Refreshing access token")
 
+	// TODO: This needs to be rate-limited
 	refreshToken := GetRefreshToken()
 	if refreshToken == "" {
 		log.Println("No refresh token")
