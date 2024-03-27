@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"bytes"
 	dbx "github.com/RyanBreaker/go-photo-upload/internal/dropbox"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"net/http"
 	"path"
@@ -10,26 +12,37 @@ import (
 
 func UploadRoute(router *gin.Engine) {
 	router.POST("/upload", func(c *gin.Context) {
-		log.Println("Processing request")
-		name := c.PostForm("name")
-		name = path.Clean(name)
+		log.Println("Processing request...")
 
-		form, _ := c.MultipartForm()
+		form, _ := c.Request.MultipartReader()
 
-		photos := form.File["photos[]"]
-		log.Println("Received", len(photos), "photos from", name)
+		var name string
+		var photos []dbx.Photo
+		for {
+			part, err := form.NextPart()
+			if err == io.EOF {
+				break
+			}
 
-		var photosToUpload []dbx.Photo
-		for _, photo := range photos {
-			filePath := path.Join("/Photos", name, path.Base(photo.Filename))
-			file, _ := photo.Open()
-			photosToUpload = append(photosToUpload, dbx.Photo{
-				FilePath: filePath,
-				Data:     file,
-			})
+			if part.FormName() == "name" {
+				buf, _ := io.ReadAll(part)
+				name = string(buf)
+				continue
+			} else if part.FileName() == "" {
+				// Ignore any other fields
+				continue
+			}
+
+			buf := &bytes.Buffer{}
+			_, _ = io.Copy(buf, part)
+			photo := dbx.Photo{
+				FilePath: path.Join("/Photos", name, part.FileName()),
+				Data:     buf,
+			}
+			photos = append(photos, photo)
 		}
 
-		go dbx.QueuePhotos(photosToUpload)
+		go dbx.QueuePhotos(&photos)
 
 		c.Redirect(http.StatusSeeOther, "/?uploaded=true")
 	})

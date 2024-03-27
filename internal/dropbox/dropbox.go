@@ -4,8 +4,8 @@ import (
 	"github.com/RyanBreaker/go-photo-upload/internal/oauth"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/files"
+	"io"
 	"log"
-	"mime/multipart"
 	"strings"
 	"sync"
 	"time"
@@ -15,18 +15,21 @@ var uploadWG sync.WaitGroup
 
 type Photo struct {
 	FilePath string
-	Data     multipart.File
+	Data     io.Reader
 }
 
-func QueuePhotos(photos []Photo) {
-	log.Println("Queueing", len(photos), "photos")
+func QueuePhotos(photos *[]Photo) {
+	log.Println("Queueing", len(*photos), "files")
 
-	// TODO: Counter for when files for given batch are done?
+	n := 0
+	// Wait until all other uploads are done to start
 	uploadWG.Wait()
-	for _, photo := range photos {
+	for _, photo := range *photos {
 		uploadWG.Add(1)
-		go uploadPhoto(photo)
+		uploadPhoto(photo)
+		n++
 	}
+	log.Println("Uploaded", n, "files")
 }
 
 func uploadPhoto(photo Photo) {
@@ -39,7 +42,7 @@ func uploadPhoto(photo Photo) {
 	upload := files.NewUploadArg(photo.FilePath)
 	upload.Autorename = true
 
-	log.Println("Uploading photo to", photo.FilePath)
+	log.Println("Uploading file to", photo.FilePath)
 	for {
 		_, err := dbxClient.Upload(upload, photo.Data)
 
@@ -55,6 +58,4 @@ func uploadPhoto(photo Photo) {
 			return
 		}
 	}
-
-	log.Println("Uploaded file:", photo.FilePath)
 }
