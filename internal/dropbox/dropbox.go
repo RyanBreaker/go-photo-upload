@@ -19,17 +19,16 @@ type Photo struct {
 }
 
 func QueuePhotos(photos *[]Photo) {
-	slog.Info("Queueing", len(*photos), "files")
+	amount := len(*photos)
+	slog.Info("Queueing files", slog.Int("amount", amount))
 
-	n := 0
 	// Wait until all other uploads are done to start
 	uploadWG.Wait()
 	for _, photo := range *photos {
 		uploadWG.Add(1)
 		uploadPhoto(photo)
-		n++
 	}
-	slog.Info("Uploaded", n, "files")
+	slog.Info("Uploaded files", slog.Int("amount", amount))
 }
 
 func uploadPhoto(photo Photo) {
@@ -42,7 +41,7 @@ func uploadPhoto(photo Photo) {
 	upload := files.NewUploadArg(photo.FilePath)
 	upload.Autorename = true
 
-	slog.Info("Uploading file to", photo.FilePath)
+	slog.Info("Uploading file", slog.String("destination", photo.FilePath))
 	for {
 		_, err := dbxClient.Upload(upload, photo.Data)
 
@@ -54,7 +53,7 @@ func uploadPhoto(photo Photo) {
 			slog.Warn("Rate limited, trying again in 3 seconds")
 			time.Sleep(3 * time.Second)
 		} else {
-			slog.Error("Error uploading file:", err.Error())
+			slog.Error("Error uploading file:", slog.Any("error", err))
 			return
 		}
 	}

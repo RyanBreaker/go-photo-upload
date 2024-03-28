@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,8 +13,8 @@ import (
 var ClientId = os.Getenv("DBX_CLIENT_ID")
 var clientSecret = os.Getenv("DBX_CLIENT_SECRET")
 
-var redirectUri string
 var AuthorizeUri string
+var redirectUri string
 
 const tokenUrl = "https://api.dropboxapi.com/oauth2/token"
 
@@ -55,7 +55,7 @@ func SetTokens(code string) {
 
 	res, err := http.PostForm(tokenUrl, data)
 	if err != nil {
-		log.Println("Error getting access and refresh tokens:", err)
+		slog.Error("Error getting access and refresh tokens", slog.Any("error", err))
 		return
 	}
 	defer res.Body.Close()
@@ -67,12 +67,12 @@ func SetTokens(code string) {
 }
 
 func RefreshAccessToken() {
-	log.Println("Refreshing access token")
+	slog.Info("Refreshing access token")
 
 	// TODO: This needs to be rate-limited
 	refreshToken := GetRefreshToken()
 	if refreshToken == "" {
-		log.Println("No refresh token")
+		slog.Warn("No refresh token")
 		return // TODO: error?
 	}
 
@@ -84,7 +84,7 @@ func RefreshAccessToken() {
 
 	res, err := http.PostForm(tokenUrl, data)
 	if err != nil {
-		log.Println("Error while refreshing access token:", err)
+		slog.Error("Error while refreshing access token", slog.Any("error", err))
 		return
 	}
 	defer res.Body.Close()
@@ -92,10 +92,10 @@ func RefreshAccessToken() {
 	tokens, _ := unmarshalTokens(res.Body)
 
 	if tokens.AccessToken == "" {
-		log.Println("Empty access token received")
+		slog.Error("Empty access token received")
 		return // TODO: error?
 	}
 
 	setToken(accessToken, tokens)
-	log.Println("Set new access token")
+	slog.Info("Set new access token")
 }

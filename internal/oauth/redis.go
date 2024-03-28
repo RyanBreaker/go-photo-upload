@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"log/slog"
 	"os"
 	"time"
 )
@@ -30,7 +31,6 @@ func GetAccessToken() string {
 		var err error
 		token, err = getToken(accessToken)
 		if errors.Is(err, redis.Nil) {
-			log.Println("Refreshing access token from GetAccessToken...")
 			RefreshAccessToken()
 			continue
 		}
@@ -48,7 +48,7 @@ func getToken(tokenType string) (string, error) {
 	ctx := context.Background()
 	val, err := client.Get(ctx, tokenType).Result()
 	if err != nil {
-		log.Println("Error getting access token:", err)
+		slog.Error("Error getting access token", slog.Any("error", err))
 		return "", err
 	}
 	return val, nil
@@ -64,6 +64,6 @@ func setToken(tokenType string, token *oauthTokens) {
 		err = client.Set(ctx, tokenType, token.RefreshToken, 0).Err()
 	}
 	if err != nil {
-		log.Println("Error setting token:", err)
+		slog.Error("Error setting token: %s", err.Error())
 	}
 }

@@ -21,7 +21,7 @@ func UploadRoute(router *gin.Engine) {
 				slog.Warn("Unexpected EOF, likely due to canceled transfer")
 				return
 			}
-			slog.Error("Error processing multipart form:", err)
+			slog.Error("Error processing multipart form", slog.Any("error", err))
 			return
 		}
 

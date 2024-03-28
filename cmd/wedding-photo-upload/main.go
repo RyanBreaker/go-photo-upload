@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/RyanBreaker/go-photo-upload/internal/logger"
 	"github.com/RyanBreaker/go-photo-upload/internal/routes"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -9,7 +10,7 @@ import (
 )
 
 func main() {
-	log.SetOutput(os.Stdout)
+	slog.SetDefault(logger.Logger)
 
 	router := gin.Default()
 
