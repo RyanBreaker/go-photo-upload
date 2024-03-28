@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"errors"
 	dbx "github.com/RyanBreaker/go-photo-upload/internal/dropbox"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -22,6 +23,9 @@ func UploadRoute(router *gin.Engine) {
 			part, err := form.NextPart()
 			if err == io.EOF {
 				break
+			} else if errors.Is(err, io.ErrUnexpectedEOF) {
+				slog.Warn("Error parsing multipart form, likely canceled transfer:", err)
+				return
 			}
 
 			if part.FormName() == "name" {
