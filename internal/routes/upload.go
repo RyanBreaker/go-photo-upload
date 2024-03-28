@@ -5,14 +5,14 @@ import (
 	dbx "github.com/RyanBreaker/go-photo-upload/internal/dropbox"
 	"github.com/gin-gonic/gin"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"path"
 )
 
 func UploadRoute(router *gin.Engine) {
 	router.POST("/upload", func(c *gin.Context) {
-		log.Println("Processing request...")
+		slog.Info("Processing request...")
 
 		form, _ := c.Request.MultipartReader()
 

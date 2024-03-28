@@ -4,6 +4,7 @@ import (
 	"github.com/RyanBreaker/go-photo-upload/internal/routes"
 	"github.com/gin-gonic/gin"
 	"log"
+	"log/slog"
 	"os"
 )
 
@@ -15,7 +16,7 @@ func main() {
 	router.StaticFile("/", "./static/index.html")
 
 	router.GET("/ping", func(c *gin.Context) {
-		log.Println("pong")
+		slog.Info("pong")
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
@@ -31,7 +32,6 @@ func main() {
 
 	err := router.Run(":" + port)
 	if err != nil {
-		log.Println("Error starting server:", err.Error())
-		return
+		log.Fatalln("Error starting server:", err.Error())
 	}
 }

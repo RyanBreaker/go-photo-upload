@@ -5,7 +5,7 @@ import (
 	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/v6/dropbox/files"
 	"io"
-	"log"
+	"log/slog"
 	"strings"
 	"sync"
 	"time"
@@ -19,7 +19,7 @@ type Photo struct {
 }
 
 func QueuePhotos(photos *[]Photo) {
-	log.Println("Queueing", len(*photos), "files")
+	slog.Info("Queueing", len(*photos), "files")
 
 	n := 0
 	// Wait until all other uploads are done to start
@@ -29,7 +29,7 @@ func QueuePhotos(photos *[]Photo) {
 		uploadPhoto(photo)
 		n++
 	}
-	log.Println("Uploaded", n, "files")
+	slog.Info("Uploaded", n, "files")
 }
 
 func uploadPhoto(photo Photo) {
@@ -42,7 +42,7 @@ func uploadPhoto(photo Photo) {
 	upload := files.NewUploadArg(photo.FilePath)
 	upload.Autorename = true
 
-	log.Println("Uploading file to", photo.FilePath)
+	slog.Info("Uploading file to", photo.FilePath)
 	for {
 		_, err := dbxClient.Upload(upload, photo.Data)
 
@@ -51,10 +51,10 @@ func uploadPhoto(photo Photo) {
 		}
 
 		if strings.Contains(err.Error(), "too_many") {
-			log.Println("Rate limited, trying again in 3 seconds")
+			slog.Warn("Rate limited, trying again in 3 seconds")
 			time.Sleep(3 * time.Second)
 		} else {
-			log.Println("Error uploading file:", err.Error())
+			slog.Error("Error uploading file:", err.Error())
 			return
 		}
 	}
