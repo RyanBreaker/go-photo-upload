@@ -28,7 +28,7 @@ func QueuePhotos(photos *[]Photo) {
 		uploadWG.Add(1)
 		uploadPhoto(photo)
 	}
-	slog.Info("Uploaded files", slog.Int("amount", amount))
+	slog.Info("Done uploading files", slog.Int("amount", amount))
 }
 
 func uploadPhoto(photo Photo) {

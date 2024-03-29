@@ -6,15 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 )
+
+var isProduction = os.Getenv("ENV") == "production"
 
 func main() {
 	slog.SetDefault(logger.Logger)
 
 	router := gin.Default()
 
-	router.StaticFile("/", "./static/index.html")
+	router.LoadHTMLFiles("static/index.html")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{"isProduction": isProduction})
+	})
 
 	router.GET("/ping", func(c *gin.Context) {
 		slog.Info("pong")
