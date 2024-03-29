@@ -23,7 +23,7 @@ func main() {
 	})
 
 	router.GET("/ping", func(c *gin.Context) {
-		slog.Info("pong")
+		slog.Debug("pong")
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
